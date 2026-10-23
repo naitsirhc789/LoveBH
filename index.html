@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>LoveBH - Encontros em Belo Horizonte</title>
+    <style>
+        :root {
+            --primary: #ff4b72;
+            --secondary: #ff758c;
+            --dark: #0f0f12;
+            --card-bg: #1a1a24;
+            --text: #ffffff;
+            --text-sub: #a0a0b0;
+            --green: #2ed573;
+            --gold: #ffd700;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--dark);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 420px;
+            height: 100vh;
+            background: #121218;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* TELA DE AUTENTICAÇÃO */
+        #auth-screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(180deg, #1a000d 0%, #000000 100%);
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            justify-content: center;
+        }
+
+        .auth-logo {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .auth-logo h1 {
+            color: var(--primary);
+            font-size: 36px;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .auth-logo p {
+            color: var(--text-sub);
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 4px;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            background: none;
+            border: none;
+            color: var(--text-sub);
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .auth-tab.active {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            border-color: var(--primary);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 30px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(255, 75, 114, 0.4);
+        }
+
+        /* HEADER */
+        .top-bar {
+            padding: 14px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            z-index: 10;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: 800;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .vip-badge {
+            background: linear-gradient(45deg, #ffd700, #ffa500);
+            color: #000;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 6px 12px;
+            border-radius: 20px;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(255, 215, 0, 0.3);
+        }
+
+        /* VIEWS */
+        .view-content {
+            flex: 1;
+            position: relative;
+            display: none;
+            overflow: hidden;
+        }
+
+        .view-content.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* CARDS */
+        .cards-stage {
+            flex: 1;
+            position: relative;
+            margin: 12px 16px;
+        }
+
+        .card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 24px;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 20px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.6);
+            touch-action: none;
+            cursor: grab;
+        }
+
+        .card::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 55%;
+            background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.4) 60%, transparent);
+            border-radius: 0 0 24px 24px;
+            z-index: 1;
+        }
+
+        .card-details {
+            position: relative;
+            z-index: 2;
+        }
+
+        .card-name {
+            font-size: 26px;
+            font-weight: 700;
+        }
+
+        .card-info {
+            font-size: 14px;
+            color: var(--text-sub);
+            margin-top: 4px;
+        }
+
+        /* STAMPS */
+        .stamp {
+            position: absolute;
+            top: 40px;
+            padding: 6px 16px;
+            border: 4px solid;
+            border-radius: 10px;
+            font-size: 32px;
+            font-weight: 800;
+            text-transform: uppercase;
+            opacity: 0;
+            z-index: 3;
+            transition: opacity 0.1s ease;
+        }
+
+        .stamp-like { left: 20px; color: var(--green); border-color: var(--green); transform: rotate(-15deg); }
+        .stamp-nope { right: 20px; color: var(--primary); border-color: var(--primary); transform: rotate(15deg); }
+
+        /* CONTROLES */
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            padding: 16px;
+        }
+
+        .btn-round {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            background: var(--card-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+            transition: transform 0.2s;
+        }
+
+        .btn-round:active { transform: scale(0.9); }
+        .btn-nope { color: var(--primary); border: 2px solid var(--primary); }
+        .btn-like { color: var(--green); border: 2px solid var(--green); }
+
+        /* CHATS */
+        .chat-list { padding: 16px; overflow-y: auto; }
+        .chat-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            margin-bottom: 10px;
+        }
+        .chat-avatar {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            background-size: cover;
+            background-position: center;
+        }
+
+        /* MODAIS */
+        .modal-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.92);
+            z-index: 100;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .btn-action-main {
+            width: 100%;
+            padding: 16px;
+            border-radius: 30px;
+            border: none;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: #fff;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .vip-card-option {
+            width: 100%;
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-decoration: none;
+            color: #fff;
+        }
+
+        /* NAVEGAÇÃO INFERIOR */
+        .bottom-nav {
+            display: flex;
+            height: 65px;
+            background: #09090c;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: var(--text-sub);
+            cursor: pointer;
+        }
+
+        .nav-item.active { color: var(--primary); }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <!-- TELA DE AUTENTICAÇÃO -->
+    <div id="auth-screen">
+        <div class="auth-logo">
+            <h1>LoveBH</h1>
+            <p>Conexões reais em Belo Horizonte</p>
+        </div>
+
+        <div class="auth-tabs">
+            <button class="auth-tab active" onclick="switchTab('register')">Criar Conta</button>
+            <button class="auth-tab" onclick="switchTab('login')">Entrar</button>
+        </div>
+
+        <form id="form-register" class="auth-form" onsubmit="handleAuth(event, 'register')">
+            <div class="input-group">
+                <input type="text" id="reg-name" placeholder="O teu Nome" required>
+            </div>
+            <div class="input-group">
+                <input type="email" id="reg-email" placeholder="O teu E-mail" required>
+            </div>
+            <div class="input-group">
+                <input type="password" id="reg-pass" placeholder="Palavra-passe" required>
+            </div>
+            <div class="input-group">
+                <select id="reg-city" required>
+                    <option value="">A tua localização...</option>
+                    <option value="Belo Horizonte">Belo Horizonte - MG</option>
+                    <option value="Contagem">Contagem - MG</option>
+                    <option value="Betim">Betim - MG</option>
+                    <option value="Outra">Outra região</option>
+                </select>
+            </div>
+            <button type="submit" class="btn-submit">Criar Conta e Entrar</button>
+        </form>
+
+        <form id="form-login" class="auth-form" style="display: none;" onsubmit="handleAuth(event, 'login')">
+            <div class="input-group">
+                <input type="email" id="login-email" placeholder="O teu E-mail" required>
+            </div>
+            <div class="input-group">
+                <input type="password" id="login-pass" placeholder="Palavra-passe" required>
+            </div>
+            <button type="submit" class="btn-submit">Entrar no LoveBH</button>
+        </form>
+    </div>
+
+    <!-- BARRA SUPERIOR -->
+    <div class="top-bar">
+        <div class="logo">LoveBH</div>
+        <div class="vip-badge" onclick="openVipModal()">👑 ASSINAR VIP</div>
+    </div>
+
+    <!-- TELA 1: EXPLORAR -->
+    <div id="view-cards" class="view-content active">
+        <div class="cards-stage" id="stage"></div>
+        <div class="controls">
+            <button class="btn-round btn-nope" onclick="forceSwipe('left')">✖</button>
+            <button class="btn-round btn-like" onclick="forceSwipe('right')">♥</button>
+        </div>
+    </div>
+
+    <!-- TELA 2: MATCHES -->
+    <div id="view-chats" class="view-content">
+        <div class="chat-list" id="matches-container">
+            <p style="color: var(--text-sub); text-align: center; margin-top: 40px;">
+                Dá Like nos perfis para conseguir os teus primeiros Matches!
+            </p>
+        </div>
+    </div>
+
+    <!-- TELA 3: PERFIL -->
+    <div id="view-profile" class="view-content" style="padding: 24px; text-align: center;">
+        <div style="width: 100px; height: 100px; border-radius: 50%; background: #333; margin: 20px auto; background-image: url('https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80'); background-size: cover;"></div>
+        <h2 id="profile-user-name">Meu Perfil</h2>
+        <p id="profile-user-loc" style="color: var(--text-sub); margin-top: 6px;">Belo Horizonte, MG</p>
+        <button class="btn-action-main" onclick="openVipModal()" style="background: linear-gradient(45deg, #ffd700, #ffa500); color: #000; margin-top: 24px;">⭐ SEJA MEMBRO VIP</button>
+    </div>
+
+    <!-- MODAL MATCH -->
+    <div id="match-modal" class="modal-overlay">
+        <h2 style="font-size: 38px; color: var(--primary); font-style: italic;">Deu Match!</h2>
+        <p style="color: var(--text-sub);">Tu e <span id="match-name">Camila</span> gostaram um do outro.</p>
+        <div style="display: flex; gap: 20px; margin: 24px 0;">
+            <div style="width: 90px; height: 90px; border-radius: 50%; border: 3px solid var(--primary); background-image: url('https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80'); background-size: cover;"></div>
+            <div id="match-target-img" style="width: 90px; height: 90px; border-radius: 50%; border: 3px solid var(--primary); background-size: cover;"></div>
+        </div>
+        <button class="btn-action-main" onclick="closeModal('match-modal')">Enviar Mensagem</button>
+        <button class="btn-action-main" style="background: transparent; color: #aaa;" onclick="closeModal('match-modal')">Continuar a Deslizar</button>
+    </div>
+
+    <!-- MODAL VIP (ASAAS) -->
+    <div id="vip-modal" class="modal-overlay">
+        <h2 style="font-size: 28px; color: var(--gold); margin-bottom: 8px;">LoveBH VIP 👑</h2>
+        <p style="color: var(--text-sub); font-size: 14px; margin-bottom: 20px;">
+            Vê quem te deu Like, Matches ilimitados e destaque no topo de BH!
+        </p>
+
+        <a href="https://www.asaas.com/000/c/v70xbu41zk7uxqlf" target="_blank" class="vip-card-option">
+            <div style="text-align: left;">
+                <strong style="display: block; font-size: 16px;">Plano Mensal VIP</strong>
+                <span style="font-size: 12px; color: var(--green);">PIX / Cartão / Boleto</span>
+            </div>
+            <div style="font-size: 18px; font-weight: bold; color: var(--gold);">R$ 19,90/mês</div>
+        </a>
+
+        <a href="https://www.asaas.com/000/c/zt509x85ukmpwuel" target="_blank" class="vip-card-option">
+            <div style="text-align: left;">
+                <strong style="display: block; font-size: 16px;">Plano Semanal</strong>
+                <span style="font-size: 12px; color: var(--green);">Ideal para testar</span>
+            </div>
+            <div style="font-size: 18px; font-weight: bold; color: var(--gold);">R$ 9,90/sem</div>
+        </a>
+
+        <button class="btn-action-main" style="background: transparent; color: #aaa; margin-top: 10px;" onclick="closeModal('vip-modal')">Agora Não</button>
+    </div>
+
+    <!-- NAVEGAÇÃO INFERIOR -->
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchView('view-cards', this)">🔥</div>
+        <div class="nav-item" onclick="switchView('view-chats', this)">💬</div>
+        <div class="nav-item" onclick="switchView('view-profile', this)">👤</div>
+    </div>
+</div>
+
+<script>
+    const profiles = [
+        { name: "Camila", age: 24, location: "Belo Horizonte", bio: "Fã de boa música, encontros sinceros e fotos autênticas.", img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80", autoMatch: true },
+        { name: "Mariana", age: 22, location: "Savassi - BH", bio: "Trabalho duro, aproveito os fins de semana.", img: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=600&q=80", autoMatch: false },
+        { name: "Larissa", age: 26, location: "Pampulha - BH", bio: "Fotografia, café e conversas profundas.", img: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=600&q=80", autoMatch: true }
+    ];
+
+    let currentCardIndex = 0;
+    const stage = document.getElementById('stage');
+    const matches = [];
+
+    function switchTab(tab) {
+        document.querySelectorAll('.auth-tab').forEach(b => b.classList.remove('active'));
+        if (tab === 'register') {
+            document.querySelectorAll('.auth-tab')[0].classList.add('active');
+            document.getElementById('form-register').style.display = 'flex';
+            document.getElementById('form-login').style.display = 'none';
+        } else {
+            document.querySelectorAll('.auth-tab')[1].classList.add('active');
+            document.getElementById('form-register').style.display = 'none';
+            document.getElementById('form-login').style.display = 'flex';
+        }
+    }
+
+    function handleAuth(event, type) {
+        event.preventDefault();
+        let name = "", city = "Belo Horizonte";
+
+        if (type === 'register') {
+            name = document.getElementById('reg-name').value;
+            city = document.getElementById('reg-city').value || "Belo Horizonte";
+            localStorage.setItem('lovebh_user', JSON.stringify({ name, city }));
+        } else {
+            const email = document.getElementById('login-email').value;
+            name = email.split('@')[0];
+            localStorage.setItem('lovebh_user', JSON.stringify({ name, city: "Belo Horizonte" }));
+        }
+
+        applyUser(name, city);
+    }
+
+    function applyUser(name, city) {
+        document.getElementById('auth-screen').style.display = 'none';
+        document.getElementById('profile-user-name').innerText = name;
+        document.getElementById('profile-user-loc').innerText = city + ", MG";
+        renderCards();
+    }
+
+    window.onload = function() {
+        const saved = localStorage.getItem('lovebh_user');
+        if (saved) {
+            const u = JSON.parse(saved);
+            applyUser(u.name, u.city);
+        }
+    };
+
+    function renderCards() {
+        stage.innerHTML = '';
+        if (currentCardIndex >= profiles.length) {
+            stage.innerHTML = `<div style="text-align:center; margin-top: 120px; color: var(--text-sub);">
+                <h3>Não há mais perfis perto de ti!</h3>
+                <p style="margin-top:8px;">Assina o VIP para expandir o teu alcance.</p>
+            </div>`;
+            return;
+        }
+
+        const p = profiles[currentCardIndex];
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.style.backgroundImage = `url('${p.img}')`;
+        card.innerHTML = `
+            <div class="stamp stamp-like">LIKE</div>
+            <div class="stamp stamp-nope">NOPE</div>
+            <div class="card-details">
+                <div class="card-name">${p.name}, ${p.age}</div>
+                <div class="card-info">📍 ${p.location} • ${p.bio}</div>
+            </d
